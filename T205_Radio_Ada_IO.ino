@@ -63,7 +63,7 @@ T205 RFM69 Relay to Adafruit IO
 #endif
 
 #define  FLOAT_NO_VALUE 99999.0
-typedef struct DockSensors{
+typedef struct _DockSensors{
     float water_temp;
     float temperature;
     float pressure;
@@ -71,19 +71,58 @@ typedef struct DockSensors{
     float hum_dht22;
     float ldr1;
     float ldr2;
-} DockSensor;
+} DockSensor_value_t;
 
-typedef struct OD1_Sensors
+typedef struct _OD1_Sensors{
     float temperature;     
     float temp_dht22;     
     float hum_dht22;     
     float ldr1;     
     float ldr2;
-} OD1_Sensor;
+} OD1_Sensor_value_t;
 
-DockSensor   dock_sensor;
-OD1_Sensor   od1_sensor;
 
+typedef struct _Tupa_BME680_Sensors{
+    float temperature;     
+    float humidity;    
+    float pressure;     
+    float gas;    
+} Tupa_BME680_value_t;
+
+typedef struct DockSensors_AIO_t{
+    AdafruitIO_Feed water_temp;
+    AdafruitIO_Feed temperature;
+    AdafruitIO_Feed pressure;
+    AdafruitIO_Feed temp_dht22;
+    AdafruitIO_Feed hum_dht22;
+    AdafruitIO_Feed ldr1;
+    AdafruitIO_Feed ldr2;
+} DockSensor_AIO_t;
+
+typedef struct _OD1_Sensors_AIO{
+    AdafruitIO_Feed temperature;     
+    AdafruitIO_Feed temp_dht22;     
+    AdafruitIO_Feed hum_dht22;     
+    AdafruitIO_Feed ldr1;     
+    AdafruitIO_Feed ldr2;
+} OD1_Sensor_AIO_t;
+
+typedef struct _Tupa_BME680_Sensors_AIO{
+    AdafruitIO_Feed temperature;     
+    AdafruitIO_Feed humidity;    
+    AdafruitIO_Feed  pressure;     
+    AdafruitIO_Feed gas;    
+} Tupa_BME680_AIO_t;
+
+
+
+DockSensor_value_t   dock_sensor;
+OD1_Sensor_value_t   od1_sensor;
+Tupa_BME680_value_t  tupa_sensor;
+
+DockSensor_AIO_t     dock_aio;
+OD1_Sensor_AIO_t     od1_aio;
+Tupa_BME680_AIO_t    tupa_aio;
 
 AdafruitIO_WiFi io(IO_USERNAME, IO_KEY, WIFI_SSID, WIFI_PASS);
 // Singleton instance of the radio driver
@@ -119,40 +158,24 @@ AdafruitIO_Feed *slider = io.feed("villaastrid.ilmalampopumppu-temp");
 
 
 // Notice MQTT paths for AIO follow the form: <username>/feeds/<feedname>
-//Adafruit_MQTT_Publish water_temp = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/villaastrid.water-temp");
-AdafruitIO_Feed *water_temp = io.feed("villaastrid.water-temp");
-//Adafruit_MQTT_Publish dock_temp = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/villaastrid.dock-temp");
-AdafruitIO_Feed *dock_temp = io.feed("villaastrid.dock-temp");
-//Adafruit_MQTT_Publish dock_pres = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/villaastrid.dock-pres");
-AdafruitIO_Feed *dock_pres = io.feed("villaastrid.dock-pres");
-//Adafruit_MQTT_Publish dock_temp_dht22 = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/villaastrid.dock-temp-dht22");
-AdafruitIO_Feed * = io.feed("villaastrid.dock-hum-dht22");
-//Adafruit_MQTT_Publish dock_hum_dht22 = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/villaastrid.dock-hum-dht22");
-AdafruitIO_Feed *dock_hum_dht22 = idock_temp_dht22o.feed("villaastrid.dock-hum-dht22");
-//Adafruit_MQTT_Publish dock_ldr1 = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/villaastrid.dock-ldr1");
-AdafruitIO_Feed *dock_ldr1 = io.feed("villaastrid.dock-ldr1");
-//Adafruit_MQTT_Publish dock_ldr2 = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/villaastrid.dock-ldr2");
-AdafruitIO_Feed *dock_ldr2 = io.feed("villaastrid.dock-ldr2");
+AdafruitIO_Feed *dock_aio.water_temp   = io.feed("villaastrid.water-temp");
+AdafruitIO_Feed *dock_aio.temperature  = io.feed("villaastrid.dock-temp");
+AdafruitIO_Feed *dock_aio.pressure     = io.feed("villaastrid.dock-pres");
+AdafruitIO_Feed *dock_aio.temp_dht22   = io.feed("villaastrid.docktemp-dht22");
+AdafruitIO_Feed *dock_aio.hum_dht22    = idock_temp_dht22o.feed("villaastrid.dock-hum-dht22");
+AdafruitIO_Feed *dock_aio.ldr1         = io.feed("villaastrid.dock-ldr1");
+AdafruitIO_Feed *dock_aio.ldr2         = io.feed("villaastrid.dock-ldr2");
 
-//Adafruit_MQTT_Publish od1_temp = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/villaastrid.outdoor1-temp");
-AdafruitIO_Feed *od1_temp = io.feed("villaastrid.outdoor1-temp");
-//Adafruit_MQTT_Publish od1_temp_dht22 = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/villaastrid.outdoor1-temp-dht22");
-AdafruitIO_Feed *od1_temp_dht22 = io.feed("villaastrid.outdoor1-temp-dht22");
-//Adafruit_MQTT_Publish od1_hum_dht22 = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/villaastrid.outdoor1-hum-dht22");
-AdafruitIO_Feed *od1_hum_dht22 = io.feed("villaastrid.outdoor1-hum-dht22");
-//Adafruit_MQTT_Publish od1_ldr1 = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/villaastrid.outdoor1-ldr1");
-AdafruitIO_Feed *od1_ldr1 = io.feed("villaastrid.outdoor1-ldr1");
-//Adafruit_MQTT_Publish od1_ldr2 = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/villaastrid.outdoor1-ldr2");
-AdafruitIO_Feed *od1_ldr2 = io.feed("villaastrid.outdoor1-ldr2");
+AdafruitIO_Feed *od1_aio.temperature   = io.feed("villaastrid.outdoor1-temp");
+AdafruitIO_Feed *od1_aio.temp_dht22    = io.feed("villaastrid.outdoor1-temp-dht22");
+AdafruitIO_Feed *od1_aio.hum_dht22     = io.feed("villaastrid.outdoor1-hum-dht22");
+AdafruitIO_Feed *od1_aio.ldr1          = io.feed("villaastrid.outdoor1-ldr1");
+AdafruitIO_Feed *od1_aio.ldr2          = io.feed("villaastrid.outdoor1-ldr2");
 
-//Adafruit_MQTT_Publish tupa_temp = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/villaastrid.tupa-temp");
-AdafruitIO_Feed *tupa_temp = io.feed("villaastrid.tupa-temp");
-//Adafruit_MQTT_Publish tupa_hum = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/villaastrid.tupa-hum");
-AdafruitIO_Feed *tupa_hum = io.feed("villaastrid.tupa-hum");
-//Adafruit_MQTT_Publish tupa_pres = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/villaastrid.tupa-pres");
-AdafruitIO_Feed *tupa_pres = io.feed("villaastrid.tupa-pres");
-//Adafruit_MQTT_Publish tupa_gas = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/villaastrid.tupa-gas");
-AdafruitIO_Feed *tupa_gas = io.feed("/feeds/villaastrid.tupa-gas");
+AdafruitIO_Feed *tupa_aio.temperature  = io.feed("villaastrid.tupa-temp");
+AdafruitIO_Feed *tupa_aio.humidity     = io.feed("villaastrid.tupa-hum");
+AdafruitIO_Feed *tupa_aio.presssure    = io.feed("villaastrid.tupa-pres");
+AdafruitIO_Feed *tupa_aio.gas          = io.feed("/feeds/villaastrid.tupa-gas");
 
 
 //Adafruit_MQTT_Publish water_temp = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/villaastrid.water-temp");
@@ -266,6 +289,7 @@ void setup() {
 
     memset(&dock_sensor,FLOAT_NO_VALUE,sizeof(dock_sensor));
     memset(&od1_sensor,FLOAT_NO_VALUE,sizeof(od1_sensor));
+    memset(&tupa_sensor,FLOAT_NO_VALUE,sizeof(tupa_sensor));
     
 
   poll_rfm_millis = millis();
@@ -282,109 +306,122 @@ void setup() {
 
 void loop(void) {
 
-   
 
-    io.run();
-    if (aio_state > 10) aio_state = 0;
-    switch (aio_state) {
-        case 0: 
-            bme.beginReading();
-            break;
-        case 1: 
-            if (!bme.endReading()) {
-                Serial.println("Failed to complete reading :(");
-                aio_state = 6;
-           } else {
+    RadioRxHandler();
+
+    if ((millsi() - mqtt_connect_millis) > 5000)
+    {
+        mqtt_connect_millis = millis();
+    
+        io.run();
+        if (aio_state > 10) aio_state = 0;
+        switch (aio_state) {
+            case 0: 
+                bme.beginReading();
+                break;
+            case 1: 
+                if (!bme.endReading()) {
+                    Serial.println("Failed to complete reading of BME680 :(");
+                    aio_state = 6;
+               } else {
+                
+                    tupa_sensor.temperature  = bme.temperature;
+                    tupa_sensor.humidity     = bme.humidity;
+                    tupa_sensor.pressure     = bme.pressure;
+                    tupa_sensor.gas          = bme.gas;                
+                    aio_state++;
+               }
+            case 2: 
+                tupa_aio.temperature->save(tupa_sensor.temperature);
                 aio_state++;
-           }
-        case 2: 
-            tupa_temp->save(bme.temperature);
-            aio_state++;
-            break; 
-        case 3: 
-            tupa_hum->save(bme.humidity);
-            aio_state++;
-            break; 
-        case 4: 
-            tupa_pres->save(bme.pressure);
-            aio_state++;
-            break; 
-        case 5: 
-            tupa_gas->save(bme.gas);
-            aio_state++;
-            break; 
-        case 6:
-            water_temp->save();
-            aio_state++;
-            break; 
-        case :
-            ->save();
-            aio_state++;
-            break; 
-        case :
-            ->save();
-            aio_state++;
-            break; 
-        case :
-            ->save();
-            aio_state++;
-            break; 
-        case :
-            ->save();
-            aio_state++;
-            break; 
-        case :
-            ->save();
-            aio_state++;
-            break; 
-        case :
-            ->save();
-            aio_state++;
-            break; 
-        case :
-            ->save();
-            aio_state++;
-            break; 
-        case :
-            ->save();
-            aio_state++;
-            break; 
-        case :
-            ->save();
-            aio_state++;
-            break; 
-
-   
-
-   if ((millis() - mqtt_connect_millis ) > 1000 ){
-      MQTT_connect();
-      mqtt_connect_millis = millis();      
-   }
-   if ((millis() - bme_read_millis ) > 30000 ){
-      if (bme_ok) publish_bme_data();
-      bme_read_millis = millis();      
-   }
-    if ((millis() - bme_save_millis ) > 30000 ){
-      //if (bme_ok && sd_card_ok) save_bme_data();
-      bme_save_millis = millis();      
-   }
-   
-   if ((millis() - display_default_millis ) > DISPLAY_FALLBACK_MILLIS ){
-      if (bme_ok){
-         display_bme_values();
-      }
-      display_default_millis = millis();      
-   }
-
-   Adafruit_MQTT_Subscribe *subscription;
-   while ((subscription = mqtt.readSubscription(5000))) {
-     if (subscription == &slider) {
-       Serial.print(F("Got: "));
-       Serial.println((char *)slider.lastread);
-     }
-   }  
-   RadioRxHandler();
+                break; 
+            case 3: 
+                tupa_aio.humidity->save(tupa_sensor.humidity);
+                aio_state++;
+                break; 
+            case 4: 
+                tupa_aio.pressure->save(tupa_sensor.pressure);
+                aio_state++;
+                break; 
+            case 5: 
+                tupa_gas->save(tupa_sensor.gas);
+                aio_state++;
+                break; 
+            case 6:
+                if (dock_sensor.water_temp <> FLOAT_NO_VALUE) {
+                    dock_aio.water_temp->save(dock_sensor.water_temp)
+                }
+                aio_state++;
+                break; 
+            case :7
+                if (dock_sensor.temperature <> FLOAT_NO_VALUE) {
+                    dock_aio.temerature->save(dock_sensor.temperature);
+                aio_state++;
+                break; 
+            case :8
+                if (dock_sensor.pressure <> FLOAT_NO_VALUE) {
+                    dock_aio.pressure->save(dock_sensor.pressure);
+                }
+                aio_state++;
+                break; 
+            case :9
+                if (dock_sensor.temp_dht22 <> FLOAT_NO_VALUE) {
+                    dock_aio.temp_dht22->save(dock_sensor.temp_dht22);
+                }    
+                aio_state++;
+                break; 
+            case :10
+                if (dock_sensor.hum_dht22 <> FLOAT_NO_VALUE) {
+                    dock_aio.hum_dht22->save(dock_sensor.hum_dht22);
+                }
+                aio_state++;
+                break; 
+            case :11
+                if (dock_sensor.ldr1 <> FLOAT_NO_VALUE) {
+                    dock_aio.ldr1->save(dock_sensor.ldr1);
+                }
+                aio_state++;
+                break; 
+            case :12
+                if (dock_sensor.ldr2 <> FLOAT_NO_VALUE) {
+                    dock_aio.ldr2->save(dock_sensor.ldr2);
+                }
+                aio_state++;
+                break; 
+            case :13
+                if (od1_sensor.temperature <> FLOAT_NO_VALUE) {
+                    od1_aio.temperature->save(od1_sensor.temperature);
+                }
+                aio_state++;
+                break; 
+            case :14
+                if (od1_sensor.temp_dht22 <> FLOAT_NO_VALUE) {
+                    od1_aio.temp_dht22->save(od1_sensor.temp_dht22);
+                }
+                aio_state++;
+                break; 
+            case :15
+                if (od1_sensor.hum_dht22 <> FLOAT_NO_VALUE) {
+                    od1_aio.hum_dht22->save(od1_sensor.hum_dht22);
+                }
+                aio_state++;
+                break;
+            case :16
+                if (od1_sensor.ldr1 <> FLOAT_NO_VALUE) {
+                    od1_aio.ldr1->save(od1_sensor.ldr1);
+                }
+                aio_state++;
+                break; 
+            case :17
+                if (od1_sensor.ldr2 <> FLOAT_NO_VALUE) {
+                    od1_aio.ldr2->save(od1_sensor.ldr2);
+                }
+                aio_state++;
+                break; 
+         }                 
+    }
 }
+ 
 void display_bme_values(){
    row[0] = "Temp=";row[0].concat(bme.temperature); row[0].concat("C");
    row[0].concat(" Hum=");row[0].concat(String(bme.humidity,0)); row[0].concat("%");
@@ -393,59 +430,6 @@ void display_bme_values(){
    display_rows();
 }
 
-void save_bme_data(void){
-  /*
-  String file_name = "test001.txt";
-  //String file_name = String(now.year()+'_'+now.month()+'_'+now.day()+".txt");
-  //String file_name = String(now.year())+'_'+String(now.month())+'_'+String(now.day())+".txt";
-  Serial.print("Filename= ");Serial.println(file_name);
-  if (SD.exists(file_name)) {
-    Serial.println("file exists.");
-  } else {
-    Serial.println("file doesn't exist.");
-    myFile = SD.open(file_name, FILE_WRITE);
-    myFile.close();
-  }
-  */
-}
-
-void publish_bme_data(void){
-  float value;
-  if (! bme.performReading()) {
-    Serial.println("Failed to perform reading :(");
-    return;
-  }
-  Serial.print("Temperature = "); Serial.print(bme.temperature); Serial.println(" *C");
-  Serial.print("Pressure = "); Serial.print(bme.pressure / 100.0); Serial.println(" hPa");
-  Serial.print("Humidity = "); Serial.print(bme.humidity); Serial.println(" %");
-  Serial.print("Gas = "); Serial.print(bme.gas_resistance / 1000.0); Serial.println(" KOhms");
-  
-  switch(bme_indx){
-    case 0: 
-      value = bme.temperature;
-      active_feed = &tupa_temp;
-      break;
-    case 1: 
-      value = bme.humidity;
-      active_feed = &tupa_hum;
-      break;
-    case 2: 
-      value = bme.pressure;
-      active_feed = &tupa_pres;
-      break;
-    case 3: 
-      value = bme.gas_resistance;
-      active_feed = &tupa_gas;
-      break;
-  }
-  //Serial.print(active_feed -> feed);
-  if (!active_feed -> publish(value)) {
-    Serial.println(F("Failed"));
-  } else {
-    Serial.println(F("OK!"));
-  }
-  if(++bme_indx > 3) bme_indx = 0;
-}
 
 
 void RadioRxHandler(void){
