@@ -110,9 +110,9 @@ bsec_virtual_sensor_t sensorList[10] = {
 
 int16_t packetnum = 0;  // packet counter, we increment per xmission
 
-void BsecInitialize(void);
-void checkIaqSensorStatus(void);
-void RadioRxHandler(void);
+void   BsecInitialize(void);
+void   checkIaqSensorStatus(void);
+void   RadioRxHandler(void);
 String parse_json(String fromStr, char *tag);
 
 
@@ -355,45 +355,46 @@ void RadioRxHandler(void){
    float  fsensor_value;
 
    if (rf69.available()) {
-    // Should be a message for us now   
-    uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
-    uint8_t len = sizeof(buf);
-    if (rf69.recv(buf, &len)) {
-      if (!len) return;
-      buf[len] = 0;
-      Serial.print("Received [");
-      Serial.print(len);
-      Serial.print("]: ");
-      Serial.println((char*)buf);
-      Serial.print("RSSI: ");
-      Serial.println(rf69.lastRssi(), DEC);
-      inputString = (char*)buf;
-      sensor_zone = parse_json(inputString,"{\"Z");
-      sensor_name = parse_json(inputString,",\"S");
-      sensor_value = parse_json(inputString,",\"V");
-      fsensor_value = sensor_value.toFloat();
-      row[2] = sensor_zone; row[2].concat(":");
-      row[2].concat(sensor_name);row[2].concat(":");
-      row[2].concat(sensor_value);
-      display_rows();
-      Serial.println(sensor_zone); Serial.println(sensor_name); Serial.println(sensor_value);
-      if (sensor_zone == "Dock"){
-        if (sensor_name == "T_Water")  dock_sensor.water_temp = fsensor_value;
-        if (sensor_name == "T_bmp180") dock_sensor.temperature = fsensor_value;
-        if (sensor_name == "P_bmp180") dock_sensor.pressure = fsensor_value;
-        if (sensor_name == "T_dht22")  dock_sensor.temp_dht22 = fsensor_value;
-        if (sensor_name == "H_dht22")  dock_sensor.hum_dht22 = fsensor_value;
-        if (sensor_name == "ldr1")     dock_sensor.ldr1 = fsensor_value;
-        if (sensor_name == "ldr2")     dock_sensor.ldr2 = fsensor_value;
-      }
-      if (sensor_zone == "OD_1"){
-         if (sensor_name == "Temp")    od1_sensor.temperature = fsensor_value;     
-         if (sensor_name == "Temp2")   od1_sensor.temp_dht22 = fsensor_value;     
-         if (sensor_name == "Hum")     od1_sensor.hum_dht22 = fsensor_value;     
-         if (sensor_name == "Light1")  od1_sensor.ldr1 = fsensor_value;     
-         if (sensor_name == "Light2")  od1_sensor.ldr2 = fsensor_value;
-      }      
-  }  
+      // Should be a message for us now   
+      uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
+      uint8_t len = sizeof(buf);
+      if (rf69.recv(buf, &len)) {
+          if (!len) return;
+          buf[len] = 0;
+          Serial.print("Received [");
+          Serial.print(len);
+          Serial.print("]: ");
+          Serial.println((char*)buf);
+          Serial.print("RSSI: ");
+          Serial.println(rf69.lastRssi(), DEC);
+          inputString = (char*)buf;
+          sensor_zone = parse_json(inputString,"{\"Z");
+          sensor_name = parse_json(inputString,",\"S");
+          sensor_value = parse_json(inputString,",\"V");
+          fsensor_value = sensor_value.toFloat();
+          row[2] = sensor_zone; row[2].concat(":");
+          row[2].concat(sensor_name);row[2].concat(":");
+          row[2].concat(sensor_value);
+          display_rows();
+          Serial.println(sensor_zone); Serial.println(sensor_name); Serial.println(sensor_value);
+          if (sensor_zone == "Dock"){
+              if (sensor_name == "T_Water")  dock_sensor.water_temp = fsensor_value;
+              if (sensor_name == "T_bmp180") dock_sensor.temperature = fsensor_value;
+              if (sensor_name == "P_bmp180") dock_sensor.pressure = fsensor_value;
+              if (sensor_name == "T_dht22")  dock_sensor.temp_dht22 = fsensor_value;
+              if (sensor_name == "H_dht22")  dock_sensor.hum_dht22 = fsensor_value;
+              if (sensor_name == "ldr1")     dock_sensor.ldr1 = fsensor_value;
+              if (sensor_name == "ldr2")     dock_sensor.ldr2 = fsensor_value;
+          }
+          if (sensor_zone == "OD_1"){
+               if (sensor_name == "Temp")    od1_sensor.temperature = fsensor_value;     
+               if (sensor_name == "Temp2")   od1_sensor.temp_dht22 = fsensor_value;     
+               if (sensor_name == "Hum")     od1_sensor.hum_dht22 = fsensor_value;     
+               if (sensor_name == "Light1")  od1_sensor.ldr1 = fsensor_value;     
+               if (sensor_name == "Light2")  od1_sensor.ldr2 = fsensor_value;
+          } 
+      }     
+   }  
 }
 
 String parse_json(String fromStr, char *tag){
@@ -412,42 +413,14 @@ String parse_json(String fromStr, char *tag){
     return(fromStr.substring(pos1,pos2));
 }
 
-// Function to connect and reconnect as necessary to the MQTT server.
-// Should be called in the loop function and it will take care if connecting.
-void MQTT_connect() {
-  int8_t ret;
-
-  // Stop if already connected.
-  if (mqtt.connected()) {
-    // check if its the slider feed
-    
-    return;
-  }
-
-  Serial.print("Connecting to MQTT... ");
-
-  uint8_t retries = 3;
-  while ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
-       Serial.println(mqtt.connectErrorString(ret));
-       Serial.println("Retrying MQTT connection in 5 seconds...");
-       mqtt.disconnect();
-       delay(5000);  // wait 5 seconds
-       retries--;
-       if (retries == 0) {
-         // basically die and wait for WDT to reset me
-         while (1);
-       }
-  }
-  Serial.println("MQTT Connected!");
-}
-
 
 
 // Helper function definitions
 void BsecInitialize(void){
     String output;
     
-    iaqSensor.begin(BME680_I2C_ADDR_SECONDARY, Wire);
+    iaqSensor.begin(BME680
+    _I2C_ADDR_SECONDARY, Wire);
     output = "\nBSEC library version " + String(iaqSensor.version.major) + "." + String(iaqSensor.version.minor) + "." + String(iaqSensor.version.major_bugfix) + "." + String(iaqSensor.version.minor_bugfix);
     Serial.println(output);
     checkIaqSensorStatus();
@@ -487,17 +460,18 @@ void checkIaqSensorStatus(void)
 
 
 boolean bme_setup(){
-  if (!bme.begin(0x76)) {
-    Serial.println("Could not find a valid BME680 sensor, check wiring!");
-    return(false);
-  }
+  //if (!bme.begin(0x76)) {
+  //  Serial.println("Could not find a valid BME680 sensor, check wiring!");
+  //  return(false);
+  //}
 
-  // Set up oversampling and filter initialization
+  /* Set up oversampling and filter initialization
   bme.setTemperatureOversampling(BME680_OS_8X);
   bme.setHumidityOversampling(BME680_OS_2X);
   bme.setPressureOversampling(BME680_OS_4X);
   bme.setIIRFilterSize(BME680_FILTER_SIZE_3);
   bme.setGasHeater(320, 150); // 320*C for 150 ms
+  */
   return(true);
 }
 
